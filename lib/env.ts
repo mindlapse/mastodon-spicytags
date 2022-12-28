@@ -9,19 +9,25 @@ if (!process.env.npm_config_env) {
 const path = "env/.env." + process.env.npm_config_env;
 require("dotenv").config({ path });
 
-if (!process.env.API_URL) {
+if (!process.env.HOME_API_URL || !process.env.SCAN_API_URL) {
   console.log(`Missing ${process.env.npm_config_env}`);
   process.exit(2);
 }
 
-// The base URL for the API - for example: https://mastodon.social/api/v1/
-export const API_URL = process.env.API_URL!;
-
-// The Mastodon account ID
+// Your Mastodon account ID
 export const ACCOUNT_ID = process.env.ACCOUNT_ID!;
 
-// An access token for the above Mastodon account
-export const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
+// The base URL your home API, needed to load followers
+export const HOME_API_URL = process.env.HOME_API_URL!;
+
+// An access token valid for the Mastodon instance at HOME_API_URL
+export const HOME_ACCESS_TOKEN = process.env.HOME_ACCESS_TOKEN;
+
+// The base URL for the API to scan - e.g. https://mastodon.social/api/v1/
+export const SCAN_API_URL = process.env.SCAN_API_URL!;
+
+// An access token valid for the Mastodon instance at SCAN_API_URL
+export const SCAN_ACCESS_TOKEN = process.env.SCAN_ACCESS_TOKEN;
 
 // Time to sleep between fetches
 export const SLEEP_MS = parseInt(process.env.SLEEP_MS!);

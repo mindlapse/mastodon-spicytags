@@ -2,11 +2,10 @@ import sleep from "sleep-promise";
 import Followers from "./lib/followers";
 import Tags from "./lib/tags";
 import spicyTags from "./spicyTags.json";
-import { API_URL, ACCESS_TOKEN, ACCOUNT_ID, SLEEP_MS } from "./lib/env";
+import { HOME_API_URL, HOME_ACCESS_TOKEN, SCAN_API_URL, SCAN_ACCESS_TOKEN, ACCOUNT_ID, SLEEP_MS } from "./lib/env";
 
 const Mastodon = require("mastodon-api");
 
-const M = new Mastodon({ api_url: API_URL, access_token: ACCESS_TOKEN });
 const tags = new Tags(spicyTags.spicyTags);
 
 const main = async () => {
@@ -23,11 +22,14 @@ const main = async () => {
   */
 
   const allTagsSeen = new Set();
-  const following = new Followers(M, ACCOUNT_ID);
+  const homeInstance = new Mastodon({ api_url: HOME_API_URL, access_token: HOME_ACCESS_TOKEN });
+  const following = new Followers(homeInstance, ACCOUNT_ID);
   const follows = await following.load();
   console.log(`Loaded ${follows.size} following`);
 
+  const M = new Mastodon({ api_url: SCAN_API_URL, access_token: SCAN_ACCESS_TOKEN });
   do {
+    
     const result = await M.get("timelines/public", {});
     const newTags = new Set();
     const batchTags = new Set();
@@ -51,7 +53,7 @@ const main = async () => {
       // If the batch has a post with a spicy tag, log the user & spicy tags
       const spicy = tags.getSpicyTags(item.tags);
       if (spicy && spicy.length !== 0) {
-        console.log(`\n${user} #${spicy}`);
+        console.log(`\n${user} #${spicy}\n`);
         follows.add(user);
       }
     }
