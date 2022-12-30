@@ -26,6 +26,7 @@ model UserTag {
 }
 
 model SpicyUser {
-  user     String   @id
+  id       BigInt   @id @default(autoincrement()) @db.BigInt
+  user     String   @unique
   added_on DateTime @db.Date
 }

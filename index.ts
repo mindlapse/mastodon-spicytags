@@ -61,13 +61,10 @@ const main = async () => {
 
       // If the post has a spicy tag, log and store the user
       const spicy = tags.getSpicyTags(post.tags);
-      if (spicy && spicy.length !== 0) {
+      if (spicy && spicy.length !== 0 && !follows.has(user)) {
         console.log(`\n${user} #${spicy}\n`);
-
-        if (!follows.has(user)) {
-          follows.add(user);
-          await following.save(user);
-        }
+        follows.add(user);
+        await following.save(user);
       }
 
       // Save the tags from the post
