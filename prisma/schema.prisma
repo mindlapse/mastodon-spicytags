@@ -1,0 +1,19 @@
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  engineType = "binary"
+}
+
+model TagCount {
+  id    Int @id @default(autoincrement())
+  date  DateTime @db.Date
+  tag   String
+  count Int
+
+  @@index([date, tag, count])
+}

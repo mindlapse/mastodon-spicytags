@@ -1,8 +1,12 @@
+import { PrismaClient } from "@prisma/client";
+
 export default class Tags {
   private spicyTags: Set<string>;
+  private prisma: PrismaClient;
 
   constructor(spicyTags: string[]) {
     this.spicyTags = new Set(spicyTags);
+    this.prisma = new PrismaClient();
   }
 
   /*
@@ -17,6 +21,15 @@ export default class Tags {
       }
     }
     return found;
+  }
+
+  async insertTags(tags: Map<string, number>) {
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    await this.prisma.tagCount.createMany({
+      data: Array.from(tags, ([tag, count]) => ({ tag, count, date: today })),
+    });
   }
 }
 
