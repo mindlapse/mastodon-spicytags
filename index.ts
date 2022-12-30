@@ -27,8 +27,6 @@ const main = async () => {
       - Show the current tags
   */
 
-  const allTagsSeen = new Set();
-
   const homeInstance = new Mastodon({
     api_url: HOME_API_URL,
     access_token: HOME_ACCESS_TOKEN,
@@ -41,39 +39,43 @@ const main = async () => {
     api_url: SCAN_API_URL,
     access_token: SCAN_ACCESS_TOKEN,
   });
+  const postDedup = new Set();
+
   do {
     const result = await M.get("timelines/public", {});
-    const newTags = new Set();
-    const batchTagCounts = new Map<string, number>();
+    const batchTags = new Set();
 
-    for (let item of result.data) {
-      const user = item.account.acct;
+    for (let post of result.data) {
+      const user = post.account.acct as string;
+      const postTags = new Set<string>();
 
-      // Skip the user if it is in the follows Set
-      if (follows.has(user)) {
+      // Skip if the post was already seen
+      if (postDedup.has(post.id)) {
         continue;
       }
+      postDedup.add(post.id);
 
-      // Collect tags from the batch
-      item.tags.forEach((t: any) => {
-        if (!batchTagCounts.has(t.name)) {
-          newTags.add(t.name);
-        }
-        batchTagCounts.set(t.name, (batchTagCounts.get(t.name) ?? 0) + 1);
-      });
+      // Collect tags from the post
+      post.tags.forEach((t: any) => postTags.add(t.name));
+      postTags.forEach((tag) => batchTags.add(tag));
 
-      // If the batch has a post with a spicy tag, log the user & spicy tags
-      const spicy = tags.getSpicyTags(item.tags);
+      // If the post has a spicy tag, log and store the user
+      const spicy = tags.getSpicyTags(post.tags);
       if (spicy && spicy.length !== 0) {
         console.log(`\n${user} #${spicy}\n`);
-        follows.add(user);
+
+        if (!follows.has(user)) {
+          follows.add(user);
+          await following.save(user);
+        }
       }
+
+      // Save the tags from the post
+      await tags.savePostTags(user, postTags);
     }
 
-    await tags.insertTags(batchTagCounts);
-
     // Show timestamped tags for this batch/iteration
-    console.log(`${new Date().toISOString()} #${Array.from(newTags)}`);
+    console.log(`${new Date().toISOString()} #${Array.from(batchTags)}`);
 
     await sleep(SLEEP_MS);
   } while (true);

@@ -1,18 +1,22 @@
+import { PrismaClient } from "@prisma/client";
 import { IncomingMessage } from "http";
+import { today } from "./date";
 
 export default class Following {
   private M: any;
   private accountId: string;
+  private prisma: PrismaClient;
 
   constructor(mastodon: any, accountId: string) {
     this.M = mastodon;
     this.accountId = accountId;
+    this.prisma = new PrismaClient();
   }
 
   /*
     Return the user addresses that the account is following
   */
-  load = async () => {
+  async load() {
     let allFollowers: string[] = [];
     let maxId = undefined;
     let result;
@@ -25,11 +29,38 @@ export default class Following {
     } while (maxId);
 
     return new Set(allFollowers);
-  };
+  }
 
+
+  /*
+  Saves a userId to the database if it is not already present, stamped with the current date.
+  Note: The user is not followed
+  */
+  async save(userId: string) {
+    try {
+      const savedUser = await this.prisma.spicyUser.findUnique({
+        where: {
+          user: userId,
+        },
+      });
+  
+      if (!savedUser) {
+        await this.prisma.spicyUser.create({
+          data: {
+            user: userId,
+            added_on: today(),
+          },
+        });
+      }
+    } catch (e) {
+      console.error("Error saving SpicyUser", e)
+    }
+  }
+
+  
   private loadFollowingBatch = async (maxId?: number) => {
     if (typeof maxId === "undefined") {
-      maxId = 1000000000;
+      maxId = Number.MAX_SAFE_INTEGER;
     }
     const response = await this.M.get(
       `accounts/${this.accountId}/following?max_id=${maxId}`

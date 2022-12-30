@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { today } from "./date";
 
 export default class Tags {
   private spicyTags: Set<string>;
@@ -23,13 +24,45 @@ export default class Tags {
     return found;
   }
 
-  async insertTags(tags: Map<string, number>) {
-    var today = new Date();
-    today.setHours(0, 0, 0, 0);
+  /*
+  Persists the user (if needed) to the DB and saves their tags, for the current date.
+  */
+  async savePostTags(userAddress: string, tags: Set<string>) {
+    try {
+      const date = today();
 
-    await this.prisma.tagCount.createMany({
-      data: Array.from(tags, ([tag, count]) => ({ tag, count, date: today })),
-    });
+      let user = await this.prisma.user.findUnique({
+        where: {
+          user: userAddress,
+        },
+      });
+
+      if (!user) {
+        // Create the user if they don't already exist
+        user = await this.prisma.user.create({
+          data: {
+            added_on: date,
+            user: userAddress,
+            tags: {
+              createMany: {
+                data: Array.from(tags, tag => ({ tag, date })),
+              },
+            },
+          },
+        });
+      } else {
+        // Add tags for the existing user
+        await this.prisma.userTag.createMany({
+          data: Array.from(tags, tag => ({
+            tag,
+            userId: user!.id,
+            date,
+          })),
+        });
+      }
+    } catch (e) {
+      console.error("Error saving user tags", e);
+    }
   }
 }
 

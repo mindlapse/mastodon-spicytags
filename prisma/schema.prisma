@@ -1,19 +1,31 @@
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
   engineType = "binary"
 }
 
-model TagCount {
-  id    Int @id @default(autoincrement())
-  date  DateTime @db.Date
-  tag   String
-  count Int
+model User {
+  id       Int       @id @default(autoincrement())
+  user     String    @unique
+  added_on DateTime  @db.Date
+  tags     UserTag[]
+}
 
-  @@index([date, tag, count])
+model UserTag {
+  id     BigInt   @id @default(autoincrement()) @db.BigInt
+  tag    String
+  user   User     @relation(fields: [userId], references: [id])
+  userId Int
+  date   DateTime @db.Date
+
+  @@index([date, tag, userId])
+}
+
+model SpicyUser {
+  user     String   @id
+  added_on DateTime @db.Date
 }
