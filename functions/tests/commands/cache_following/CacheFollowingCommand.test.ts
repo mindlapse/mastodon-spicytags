@@ -1,10 +1,10 @@
-import { jest, expect } from "@jest/globals";
+import { jest, expect, describe, beforeEach, it } from "@jest/globals";
 import CacheFollowingCommand from "../../../src/commands/cache_following/CacheFollowingCommand";
-import FollowsCache from "../../../src/svc/cache/follows";
-import Following from "../../../src/lib/mastodon/following";
+import FollowsCache from "../../../src/svc/cache/FollowsCache";
+import Following from "../../../src/svc/mastodon/Following";
 
-jest.mock("../../../src/lib/mastodon/following")
-jest.mock("../../../src/svc/cache/follows");
+jest.mock("../../../src/svc/mastodon/Following")
+jest.mock("../../../src/svc/cache/FollowsCache");
 
 const cache = new FollowsCache("url");
 const following = new Following("api", "accountId")

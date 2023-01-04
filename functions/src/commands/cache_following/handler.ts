@@ -1,7 +1,7 @@
 import Config from "../../config";
 import CacheFollowingCommand from "./CacheFollowingCommand";
 
-export default async (payload: {}, config: Config) => {
+export default async (_: {}, config: Config) => {
   return await new CacheFollowingCommand({
     mastodonAccountId: config.getAccountId(),
     mastodonApi: config.getHomeApiUrl(),

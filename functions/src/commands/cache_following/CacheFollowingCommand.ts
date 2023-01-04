@@ -1,5 +1,5 @@
-import Following from "../../lib/mastodon/following";
-import FollowsCache from "../../svc/cache/follows";
+import Following from "../../svc/mastodon/Following";
+import FollowsCache from "../../svc/cache/FollowsCache";
 const Mastodon = require("mastodon-api");
 
 export default class CacheFollowingCommand {
