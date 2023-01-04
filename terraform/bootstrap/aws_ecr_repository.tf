@@ -3,5 +3,5 @@ resource "aws_ecr_repository" "ecr" {
     scan_on_push = false
   }
   image_tag_mutability = "MUTABLE"
-  name = "${local.prefix}_core"
+  name                 = "${local.prefix}_core"
 }
