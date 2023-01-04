@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { today } from "./date";
+import { today } from "../functions/src/lib/util/date";
 
 export default class Tags {
   private spicyTags: Set<string>;

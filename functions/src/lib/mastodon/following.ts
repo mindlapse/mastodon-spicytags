@@ -1,6 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { IncomingMessage } from "http";
-import { today } from "../functions/src/lib/util/date";
+import { today } from "../util/date";
 
 export default class Following {
   private M: any;
@@ -12,6 +12,7 @@ export default class Following {
     this.accountId = accountId;
     this.prisma = new PrismaClient();
   }
+
 
   /*
     Return the user addresses that the account is following

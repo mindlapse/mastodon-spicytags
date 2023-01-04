@@ -3,3 +3,7 @@ node_modules
 *.js
 .env.*
 !.env.sample
+.terraform
+.terraform.*
+terraform.tfstate*
+terraform/terraform.tfvars
