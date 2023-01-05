@@ -1,4 +1,4 @@
 export interface MastodonClientConfig {
-  apiUrl: string;
-  apiKey: string;
+    apiUrl: string
+    apiKey: string
 }

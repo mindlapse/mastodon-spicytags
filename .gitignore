@@ -1,6 +1,7 @@
 build
 node_modules
 *.js
+!jest.config.js
 .env.*
 !.env.sample
 .terraform

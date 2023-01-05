@@ -1,20 +1,26 @@
-import { GetParameterCommand, SSMClient } from "@aws-sdk/client-ssm";
+import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm'
 
-const client = new SSMClient({});
+const client = new SSMClient({})
 
 /*
     Fetch a secret from AWS Parameter Store and decode with JSON.parse
 */
 export const getJsonSecret = async (key: string) => {
-    const keyPath = createKeyPath(key);
-    
-    const secret = await client.send(new GetParameterCommand({
-        Name: keyPath,
-        WithDecryption: true
-    })).then(output => output.Parameter?.Value)
+    const keyPath = createKeyPath(key)
 
-    console.log(`ssm:getSecret(): Loaded ${keyPath}.  Secret length: ${secret?.length}`);
-    return secret ? JSON.parse(secret) : undefined;
+    const secret = await client
+        .send(
+            new GetParameterCommand({
+                Name: keyPath,
+                WithDecryption: true,
+            })
+        )
+        .then((output) => output.Parameter?.Value)
+
+    console.log(
+        `ssm:getSecret(): Loaded ${keyPath}.  Secret length: ${secret?.length}`
+    )
+    return secret ? JSON.parse(secret) : undefined
 }
 
 /*
