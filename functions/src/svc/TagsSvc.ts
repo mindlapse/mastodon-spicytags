@@ -1,13 +1,13 @@
-import { PrismaClient } from "@prisma/client";
+import PrismaClient from "../lib/clients/PrismaClient";
 import { today } from "../lib/util/date";
 
 export default class TagsSvc {
   private spicyTags: Set<string>;
-  private prisma: PrismaClient;
+  private pc: PrismaClient;
 
-  constructor(spicyTags: string[], prisma: PrismaClient) {
+  constructor(spicyTags: string[], pc: PrismaClient) {
     this.spicyTags = new Set(spicyTags);
-    this.prisma = prisma;
+    this.pc = pc;
   }
 
   /*
@@ -30,8 +30,9 @@ export default class TagsSvc {
   async savePostTags(userAddress: string, tags: Set<string>) {
     try {
       const date = today();
+      const prisma = this.pc.getClient()
 
-      let user = await this.prisma.user.findUnique({
+      let user = await prisma.user.findUnique({
         where: {
           user: userAddress,
         },
@@ -39,7 +40,7 @@ export default class TagsSvc {
 
       if (!user) {
         // Create the user if they don't already exist
-        user = await this.prisma.user.create({
+        user = await prisma.user.create({
           data: {
             added_on: date,
             user: userAddress,
@@ -52,7 +53,7 @@ export default class TagsSvc {
         });
       } else {
         // Add tags for the existing user
-        await this.prisma.userTag.createMany({
+        await prisma.userTag.createMany({
           data: Array.from(tags, tag => ({
             tag,
             userId: user!.id,

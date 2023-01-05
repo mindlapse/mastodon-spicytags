@@ -1,52 +1,27 @@
-import { createClient } from "redis";
+import RedisClient from "../../lib/clients/RedisClient";
 
 export default class FollowsCache {
-    
-    private redisURL: string;
-    private client?: ReturnType<typeof createClient>;
-    private followsKey: string;
+  private followsKey: string;
+  private rc: RedisClient;
 
-    constructor(redisURL: string) {
-        this.redisURL = redisURL;
-        this.followsKey = this.getKey();
-    }
+  constructor(rc: RedisClient) {
+    this.rc = rc;
+    this.followsKey = this.getKey();
+  }
 
+  async clearFollows() {
+    await this.rc.del(this.followsKey);
+  }
 
-    async connect(): Promise<FollowsCache> {
-        const redis = await createClient({ url: this.redisURL })
-        redis.on('error', (err) => {
-            console.log('Redis Client Error', err)
-            redis.disconnect();
-        });
-        await redis.connect();
-        this.client = redis;
-        return this;
-    }
+  async addFollows(...follows: string[]) {
+    await this.rc.sAdd(this.followsKey, ...follows);
+  }
 
+  async getFollows(): Promise<Set<string>> {
+    return new Set(await this.rc.sMembers(this.followsKey));
+  }
 
-    getKey() {
-        return `${process.env.PRODUCT}:${process.env.ENV}:follows`;
-    }
-    
-
-    async clearFollows() {
-        await this.client?.del(this.followsKey);
-    }
-    
-
-    async addFollows(...follows: string[]) {
-        await this.client?.sAdd(this.followsKey, follows);
-    }
-    
-
-    async getFollows() {
-        return new Set(await this.client?.sMembers(this.followsKey));
-    }
-
-
-    async disconnect() {
-        return await this.client?.disconnect();
-    }
-    
+  private getKey() {
+    return `${process.env.PRODUCT}:${process.env.ENV}:follows`;
+  }
 }
-

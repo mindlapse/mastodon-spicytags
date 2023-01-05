@@ -1,11 +1,11 @@
-import { PrismaClient } from "@prisma/client";
+import PrismaClient from "../lib/clients/PrismaClient";
 import { today } from "../lib/util/date";
 
 export default class SpicyUsersSvc {
-  private prisma: PrismaClient;
+  private pc: PrismaClient;
 
-  constructor(prisma: PrismaClient) {
-    this.prisma = prisma;
+  constructor(pc: PrismaClient) {
+    this.pc = pc;
   }
 
   /*
@@ -14,14 +14,15 @@ export default class SpicyUsersSvc {
   */
   async save(userId: string) {
     try {
-      const savedUser = await this.prisma.spicyUser.findUnique({
+      const prisma = this.pc.getClient()
+      const savedUser = await prisma.spicyUser.findUnique({
         where: {
           user: userId,
         },
       });
 
       if (!savedUser) {
-        await this.prisma.spicyUser.create({
+        await prisma.spicyUser.create({
           data: {
             user: userId,
             added_on: today(),

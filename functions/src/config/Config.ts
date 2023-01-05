@@ -1,4 +1,5 @@
-import { getJsonSecret } from "./lib/aws/ssm/ssm";
+import { getJsonSecret } from "../lib/aws/ssm/ssm";
+import { MastodonClientConfig } from "./MastodonClientConfig";
 
 export type ConfigType = { [key: string]: string };
 
@@ -25,24 +26,22 @@ export default class Config {
     }
   }
 
-  getAccountId() {
+  getHomeAccountId() {
     return this.config[KEY_HOME_ACCOUNT_ID];
   }
 
-  getHomeApiUrl() {
-    return this.config[KEY_HOME_API_URL];
+  getHomeMastodonClientConfig(): MastodonClientConfig {
+    return {
+      apiUrl: this.config[KEY_HOME_API_URL],
+      apiKey: this.config[KEY_HOME_API_KEY]
+    }
   }
 
-  getHomeApiKey() {
-    return this.config[KEY_HOME_API_KEY];
-  }
-
-  getScanApiUrl() {
-    return this.config[KEY_SCAN_API_URL];
-  }
-
-  getScanApiKey() {
-    return this.config[KEY_SCAN_API_KEY];
+  getScanMastodonClientConfig(): MastodonClientConfig {
+    return {
+      apiUrl: this.config[KEY_SCAN_API_URL],
+      apiKey: this.config[KEY_SCAN_API_KEY]
+    }
   }
 
   getDatabaseUrl() {

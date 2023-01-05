@@ -1,37 +1,43 @@
-import Config from "../../config";
+import Config from "../../config/Config";
 import SampleTagsCommand from "./SampleTagsCommand";
 import { spicyTags } from "../../spicyTags.json";
 import TagsSvc from "../../svc/TagsSvc";
-import { PrismaClient } from "@prisma/client";
 import SpicyUsersSvc from "../../svc/SpicyUsersSvc";
-import { loadFollows } from "../../svc/FollowsSvc";
+import RemoteContext from "../../lib/context/RemoteContext";
+import MastodonClient from "../../lib/clients/MastodonClient";
+import PrismaClient from "../../lib/clients/PrismaClient";
+import RedisClient from "../../lib/clients/RedisClient";
+import FollowsCache from "../../svc/cache/FollowsCache";
 
 export default async (_: {}, config: Config) => {
-  // Load current follows from cache
-  const follows = await loadFollows(config.getRedisUrl());
-  console.log(`Loaded ${follows.size} following`);
 
-  let prisma;
+
+  const remotes = new RemoteContext();
   try {
-    // Initialize DB
-    process.env.DATABASE_URL = config.getDatabaseUrl();
-    prisma = new PrismaClient();
+    const mc = new MastodonClient(config.getScanMastodonClientConfig());
+    const pc = new PrismaClient(config.getDatabaseUrl());
+    const rc = new RedisClient(config.getRedisUrl());
+    await remotes.addClient(mc).addClient(pc).addClient(rc).initialise();
 
-    // Sample tags, storing
+    // Load current follows from cache
+    const followsCache = new FollowsCache(rc);
+    const follows = await followsCache.getFollows();
+    console.log(`Loaded ${follows.size} following`);
+
+    // Sample tags & store results
     const tagsSampled = await new SampleTagsCommand({
-      mastodonAPI: config.getHomeApiUrl(),
-      mastodonAPIKey: config.getHomeApiKey(),
+      mastodonClient: mc,
       onPost: createOnPost(
         follows,
-        new TagsSvc(spicyTags, prisma),
-        new SpicyUsersSvc(prisma)
+        new TagsSvc(spicyTags, pc),
+        new SpicyUsersSvc(pc)
       ),
     }).send();
 
     // Show timestamped tags for this batch/iteration
     console.log(`${new Date().toISOString()} #${Array.from(tagsSampled)}`);
   } finally {
-    await prisma?.$disconnect();
+    await remotes.cleanup();
   }
 };
 
@@ -40,7 +46,9 @@ export const createOnPost = (
   tagsSvc: TagsSvc,
   spicyUsersSvc: SpicyUsersSvc
 ) => {
-  return async (user: string, postTags: Set<string>) => {
+  return async (post: any, postTags: Set<string>) => {
+    const user = post.account.acct as string;
+
     // Extract spicy tags. If one is found, then store the user.
     const spicy = tagsSvc.extractAllSpicyTags(postTags);
     if (spicy && spicy.length !== 0 && !follows.has(user)) {
