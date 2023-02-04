@@ -27,7 +27,7 @@ export default class TagsSvc {
     /*
   Persists the user (if needed) to the DB and saves their tags, for the current date.
   */
-    async savePostTags(userAddress: string, tags: Set<string>) {
+    async savePostTags(userAddress: string, mastId: string, tags: Set<string>) {
         try {
             const date = today()
             const prisma = this.pc.getClient()
@@ -44,6 +44,7 @@ export default class TagsSvc {
                     data: {
                         added_on: date,
                         user: userAddress,
+                        mastId: BigInt(mastId),
                         tags: {
                             createMany: {
                                 data: Array.from(tags, (tag) => ({

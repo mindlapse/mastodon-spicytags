@@ -18,12 +18,15 @@
     "climatechange",
     "climatecrisis",
     "climatedenial",
+    "climateemergency",
     "extinction",
     "decarbonisation",
     "carbon",
     "carbonoffset",
     "co2",
+    "fossilfuels",
     "ghg",
+    "globalwarming",
     "hydrogen",
     "lithium",
     "magnesium",
@@ -78,6 +81,8 @@
     "greatsaltlake",
     "bonneville",
 
+    "ai",
+    "ml",
     "chatgpt",
     "tensorflow",
     "pytorch",
@@ -92,6 +97,7 @@
     "serverless",
     "fargate",
     "lambda",
+    "programming",
     "python",
     "rust",
     "rustlang",
@@ -108,6 +114,8 @@
     "openai",
     "stripe",
     "aws",
-    "openai"
+    "openai",
+    "nasa",
+    "scifi"
   ]
 }

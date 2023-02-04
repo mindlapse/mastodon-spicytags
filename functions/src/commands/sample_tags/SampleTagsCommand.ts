@@ -28,7 +28,7 @@ export default class SampleTagsCommand {
 
         // Handle each post
         for (let post of result.data) {
-            this.handlePost(post, tagsSampled)
+            await this.handlePost(post, tagsSampled)
         }
         return tagsSampled
     }

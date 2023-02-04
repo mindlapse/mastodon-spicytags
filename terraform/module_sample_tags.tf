@@ -16,4 +16,3 @@ module "sample_tags" {
   schedule_expression = "rate(3 minutes)"
   fifo = false
 }
-

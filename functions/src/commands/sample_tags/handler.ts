@@ -58,6 +58,7 @@ export const createOnPost = (
 ) => {
     return async (post: any, postTags: Set<string>) => {
         const user = post.account.acct as string
+        const userId = post.account.id
 
         // Ignore posts that were already seen & remember new posts
         if (oldPostIds.has(post.id)) return
@@ -71,6 +72,6 @@ export const createOnPost = (
         }
 
         // Save the tags from the post
-        await tagsSvc.savePostTags(user, postTags)
+        await tagsSvc.savePostTags(user, userId, postTags)
     }
 }

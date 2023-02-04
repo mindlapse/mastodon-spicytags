@@ -11,8 +11,10 @@ export default class RecentPostsCache {
     }
 
     async addRecentPostIds(...postIds: string[]) {
-        await this.rc.lPush(this.key, ...postIds)
-        await this.rc.lTrim(this.key, RecentPostsCache.MAX_ITEMS)
+        if (postIds.length > 0) {
+            await this.rc.lPush(this.key, ...postIds)
+            await this.rc.lTrim(this.key, RecentPostsCache.MAX_ITEMS)
+        }
     }
 
     async getRecentPostIds(): Promise<Set<string>> {

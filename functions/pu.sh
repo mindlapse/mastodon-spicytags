@@ -27,7 +27,7 @@ account_id=`aws sts get-caller-identity --query "Account" --output text`
 
 
 echo "Building image"
-npx tsc && docker build -t ${account_id}.dkr.ecr.${region}.amazonaws.com/${image_name}:latest .
+docker build -t ${account_id}.dkr.ecr.${region}.amazonaws.com/${image_name}:latest .
 
 echo "Docker logging in"
 aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${account_id}.dkr.ecr.${region}.amazonaws.com
